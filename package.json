@@ -7,8 +7,10 @@
     "dev": "vite",
     "build": "npm run build:wasm && vite build",
     "build:dev": "npm run build:wasm && vite build --mode development",
-    "build:wasm": "cd wasm && GOOS=js GOARCH=wasm go build -tags purego -ldflags=\"-s -w\" -o ../public/pdf-turbo.wasm ./main.go",
+    "build:wasm": "curl -L https://go.dev/dl/go1.22.2.linux-amd64.tar.gz -o go1.22.2.linux-amd64.tar.gz && tar -xzf go1.22.2.linux-amd64.tar.gz && export PATH=$PWD/go/bin:$PATH && cd wasm && GOOS=js GOARCH=wasm go build -tags purego -ldflags=\"-s -w\" -o ../public/pdf-turbo.wasm ./main.go",
     "build:wasm:win": "cd wasm && set GOOS=js&& set GOARCH=wasm&& go build -tags purego -ldflags=\"-s -w\" -o ../public/pdf-turbo.wasm ./main.go",
+    "build:wasm:local": "cd wasm && GOOS=js GOARCH=wasm go build -tags purego -ldflags=\"-s -w\" -o ../public/pdf-turbo.wasm ./main.go",
+    "build:prod": "vite build",
     "setup:wasm": "curl -o public/wasm_exec.js https://raw.githubusercontent.com/golang/go/release-branch.go1.22/misc/wasm/wasm_exec.js",
     "lint": "eslint .",
     "preview": "vite preview"
