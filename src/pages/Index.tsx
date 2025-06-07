@@ -304,6 +304,18 @@ const Index = () => {
                 </a>
               </div>
             </div>
+            
+            <div className="text-slate-400 text-xs sm:text-sm">
+              <p>
+                Have suggestions? Contact me: 
+                <a 
+                  href="mailto:support@razeenali.com" 
+                  className="text-blue-400 hover:text-blue-300 transition-colors ml-1"
+                >
+                  support@razeenali.com
+                </a>
+              </p>
+            </div>
           </div>
           
           <div className="border-t border-slate-700 mt-3 sm:mt-4 md:mt-6 pt-2 sm:pt-3 md:pt-4 text-center text-slate-500 text-xs">
