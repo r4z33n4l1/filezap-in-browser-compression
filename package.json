@@ -14,7 +14,18 @@
     "type": "git",
     "url": "https://github.com/r4z33n4l1/vaultcompress.git"
   },
-  "keywords": ["privacy", "local-compression", "offline", "pdf", "webassembly", "go", "image-compression", "pwa", "zero-upload", "client-side"],
+  "keywords": [
+    "privacy",
+    "local-compression",
+    "offline",
+    "pdf",
+    "webassembly",
+    "go",
+    "image-compression",
+    "pwa",
+    "zero-upload",
+    "client-side"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "npm run build:wasm && vite build",
@@ -58,6 +69,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@tanstack/react-query": "^5.56.2",
     "@types/pako": "^2.0.3",
+    "@types/pdfjs-dist": "^2.10.378",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -65,10 +77,13 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
     "input-otp": "^1.2.4",
+    "lovable-tagger": "^1.1.8",
     "lucide-react": "^0.454.0",
+    "next": "14.2.14",
     "next-themes": "^0.3.0",
     "pako": "^2.1.0",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.8.69",
     "react": "^18",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
@@ -80,10 +95,7 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.3",
-    "zod": "^3.23.8",
-    "next": "14.2.14",
-    "pdfjs-dist": "^4.8.69",
-    "@types/pdfjs-dist": "^2.10.378"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
