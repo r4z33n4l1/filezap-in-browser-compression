@@ -152,11 +152,11 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Header />
       
-      <main className="container mx-auto px-4 py-4 sm:py-8 max-w-6xl">
-        <div className="grid gap-4 sm:gap-8">
+      <main className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 md:py-8 max-w-6xl">
+        <div className="grid gap-3 sm:gap-4 md:gap-8">
           {/* Status Banner */}
           <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-3 sm:p-4 text-white">
-            <h2 className="text-lg sm:text-xl font-bold mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
+            <h2 className="text-sm sm:text-lg md:text-xl font-bold mb-1 sm:mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
             <p className="text-xs sm:text-sm opacity-90">
               <strong>100% Local Processing</strong> → Zero uploads, zero tracking, zero data collection!
               {files.length > 0 && ` Processing ${files.length} files privately...`}
@@ -213,23 +213,23 @@ const Index = () => {
       </main>
       
       {/* Footer */}
-      <footer className="border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm mt-8 sm:mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <footer className="border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm mt-4 sm:mt-8 md:mt-16">
+        <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+          <div className="flex flex-col gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-2">VaultCompress</h3>
-              <p className="text-slate-400 text-sm max-w-md">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-2">VaultCompress</h3>
+              <p className="text-slate-400 text-xs sm:text-sm">
                 Privacy-first file compression tool. All processing happens locally in your browser - 
                 your files never leave your device.
               </p>
             </div>
             
-            <div className="flex flex-col lg:flex-row gap-6 lg:items-center">
-              <div className="text-slate-400 text-sm">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 sm:items-center">
+              <div className="text-slate-400 text-xs sm:text-sm">
                 <p>Created by <strong className="text-white">Razeen Ali</strong></p>
               </div>
               
-              <div className="flex gap-4 text-sm">
+              <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm">
                 <a 
                   href="https://razeenali.com" 
                   target="_blank" 
@@ -258,7 +258,7 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="border-t border-slate-700 mt-6 pt-4 text-center text-slate-500 text-xs">
+          <div className="border-t border-slate-700 mt-4 sm:mt-6 pt-3 sm:pt-4 text-center text-slate-500 text-xs">
             <p>© 2024 Razeen Ali. Open source under MIT License. Built with React + WebAssembly.</p>
           </div>
         </div>

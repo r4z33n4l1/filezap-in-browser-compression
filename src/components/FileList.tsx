@@ -1,3 +1,4 @@
+
 import { Download, Trash2, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CompressedFile } from '@/pages/Index';
@@ -47,13 +48,13 @@ export const FileList = ({ files, onRemoveFile, onClearAll }: FileListProps) => 
   const getStatusIcon = (status: CompressedFile['status']) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-400" />;
+        return <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />;
       case 'compressing':
-        return <Clock className="w-5 h-5 text-blue-400 animate-pulse" />;
+        return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 animate-pulse" />;
       default:
-        return <Clock className="w-5 h-5 text-slate-400" />;
+        return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />;
     }
   };
 
@@ -73,111 +74,113 @@ export const FileList = ({ files, onRemoveFile, onClearAll }: FileListProps) => 
   const completedFiles = files.filter(f => f.status === 'completed');
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700">
-      <div className="p-6 border-b border-slate-700">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl border border-slate-700">
+      <div className="p-3 sm:p-4 md:p-6 border-b border-slate-700">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <div>
-            <h3 className="text-white text-xl font-semibold">
+            <h3 className="text-white text-base sm:text-lg md:text-xl font-semibold">
               File Processing Queue
             </h3>
-            <p className="text-slate-400">
+            <p className="text-slate-400 text-xs sm:text-sm">
               {completedFiles.length} of {files.length} files completed
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {completedFiles.length > 0 && (
               <Button
                 onClick={handleDownloadAll}
-                className="bg-blue-600 hover:bg-blue-700"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
               >
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 Download All ({completedFiles.length})
               </Button>
             )}
             <Button
               onClick={onClearAll}
+              size="sm"
               variant="outline"
-              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              className="border-slate-600 text-slate-300 hover:bg-slate-700 text-xs sm:text-sm"
             >
-              <Trash2 className="w-4 h-4 mr-2" />
+              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Clear All
             </Button>
           </div>
         </div>
       </div>
       
-      <div className="p-6">
-        <div className="space-y-3">
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="space-y-2 sm:space-y-3">
           {files.map(file => (
             <div 
               key={file.id} 
               className={cn(
-                "p-4 rounded-lg border transition-all duration-200",
+                "p-3 sm:p-4 rounded-lg border transition-all duration-200",
                 getStatusColor(file.status)
               )}
             >
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0">
+              <div className="flex items-start gap-2 sm:gap-4">
+                <div className="flex-shrink-0 mt-0.5">
                   {getStatusIcon(file.status)}
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-white font-medium truncate">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                    <p className="text-white text-sm sm:text-base font-medium truncate">
                       {file.originalFile.name}
                     </p>
                     {file.status === 'completed' && file.compressionRatio && (
-                      <span className="px-2 py-1 bg-green-600/20 text-green-400 text-xs rounded-full">
+                      <span className="px-2 py-0.5 bg-green-600/20 text-green-400 text-xs rounded-full self-start sm:self-auto">
                         -{((1 - file.compressionRatio) * 100).toFixed(1)}%
                       </span>
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap gap-4 text-sm text-slate-400">
-                    <span>Original: {formatFileSize(file.originalSize)}</span>
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1 sm:gap-4 text-xs sm:text-sm text-slate-400 mb-2">
+                    <span className="truncate">Original: {formatFileSize(file.originalSize)}</span>
                     {file.compressedSize && (
-                      <span>Compressed: {formatFileSize(file.compressedSize)}</span>
+                      <span className="truncate">Compressed: {formatFileSize(file.compressedSize)}</span>
                     )}
                     {file.timeElapsed && (
-                      <span>Time: {(file.timeElapsed / 1000).toFixed(1)}s</span>
+                      <span className="truncate">Time: {(file.timeElapsed / 1000).toFixed(1)}s</span>
                     )}
                     {file.pageCount && (
-                      <span>Pages: {file.pageCount}</span>
+                      <span className="truncate">Pages: {file.pageCount}</span>
                     )}
                     {file.processedPages && file.pageCount && (
-                      <span>Processed: {file.processedPages}/{file.pageCount}</span>
+                      <span className="truncate">Processed: {file.processedPages}/{file.pageCount}</span>
                     )}
                   </div>
                   
                   {file.error && (
-                    <p className="text-red-400 text-sm mt-1">
-                      Error: {file.error}
+                    <div className="text-red-400 text-xs sm:text-sm">
+                      <p className="font-medium">Error: {file.error}</p>
                       {file.error.includes('PDF') && (
-                        <span className="block text-xs text-slate-500 mt-1">
+                        <p className="text-slate-500 mt-1">
                           Try a different PDF or check if the file is corrupted
-                        </span>
+                        </p>
                       )}
-                    </p>
+                    </div>
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
                   {file.status === 'completed' && file.compressedBlob && (
                     <Button
                       onClick={() => handleDownload(file)}
                       size="sm"
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 w-8 h-8 p-0 sm:w-auto sm:h-auto sm:p-2"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   )}
                   <Button
                     onClick={() => onRemoveFile(file.id)}
                     size="sm"
                     variant="outline"
-                    className="border-slate-600 text-slate-400 hover:bg-slate-700"
+                    className="border-slate-600 text-slate-400 hover:bg-slate-700 w-8 h-8 p-0 sm:w-auto sm:h-auto sm:p-2"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               </div>
