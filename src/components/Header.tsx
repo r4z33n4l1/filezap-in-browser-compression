@@ -1,5 +1,4 @@
-
-import { Shield, Zap, HardDrive, Cpu } from 'lucide-react';
+import { Shield, Zap, HardDrive, Cpu, Lock, Eye } from 'lucide-react';
 
 export const Header = () => {
   return (
@@ -8,33 +7,36 @@ export const Header = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">
-              PDF-Turbo
-              <span className="text-blue-400 ml-2">🚀</span>
+              VaultCompress
+              <span className="text-green-400 ml-2">🔒</span>
             </h1>
             <p className="text-slate-300 text-lg">
-              Ultra-fast PDF & image compression powered by Go WebAssembly
+              Privacy-first file compression with WebAssembly performance
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
+              <span className="px-2 py-1 text-xs bg-green-600/20 text-green-300 rounded-full border border-green-500/20">
+                100% Private
+              </span>
               <span className="px-2 py-1 text-xs bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/20">
                 WebAssembly
               </span>
-              <span className="px-2 py-1 text-xs bg-green-600/20 text-green-300 rounded-full border border-green-500/20">
-                Go-Powered
-              </span>
               <span className="px-2 py-1 text-xs bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/20">
-                No Upload
+                Zero Upload
+              </span>
+              <span className="px-2 py-1 text-xs bg-orange-600/20 text-orange-300 rounded-full border border-orange-500/20">
+                Offline Ready
               </span>
             </div>
           </div>
           
           <div className="flex flex-wrap gap-6 text-sm">
             <div className="flex items-center gap-2 text-green-400">
-              <Shield className="w-4 h-4" />
-              <span>100% Private</span>
+              <Lock className="w-4 h-4" />
+              <span>Local Only</span>
             </div>
             <div className="flex items-center gap-2 text-blue-400">
-              <Zap className="w-4 h-4" />
-              <span>Lightning Fast</span>
+              <Eye className="w-4 h-4 opacity-50 line-through" />
+              <span>No Tracking</span>
             </div>
             <div className="flex items-center gap-2 text-purple-400">
               <Cpu className="w-4 h-4" />
@@ -43,6 +45,10 @@ export const Header = () => {
             <div className="flex items-center gap-2 text-orange-400">
               <HardDrive className="w-4 h-4" />
               <span>Multi-Format</span>
+            </div>
+            <div className="flex items-center gap-2 text-yellow-400">
+              <Zap className="w-4 h-4" />
+              <span>Ultra Fast</span>
             </div>
           </div>
         </div>

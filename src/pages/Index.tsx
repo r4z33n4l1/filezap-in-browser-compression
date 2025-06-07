@@ -158,11 +158,11 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="grid gap-8">
           {/* Status Banner */}
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 text-white">
-            <h2 className="text-xl font-bold mb-2">⚡ HYBRID: PDF.js + WASM + PDF-lib</h2>
+          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-4 text-white">
+            <h2 className="text-xl font-bold mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
             <p className="text-sm opacity-90">
-              <strong>PDF.js</strong> renders pages → <strong>WASM</strong> compresses images → <strong>PDF-lib</strong> rebuilds PDF!
-              {files.length > 0 && ` Processing ${files.length} files...`}
+              <strong>100% Local Processing</strong> → Zero uploads, zero tracking, zero data collection!
+              {files.length > 0 && ` Processing ${files.length} files privately...`}
             </p>
           </div>
           
@@ -217,6 +217,58 @@ const Index = () => {
           )}
         </div>
       </main>
+      
+      {/* Footer */}
+      <footer className="border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm mt-16">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">VaultCompress</h3>
+              <p className="text-slate-400 text-sm max-w-md">
+                Privacy-first file compression tool. All processing happens locally in your browser - 
+                your files never leave your device.
+              </p>
+            </div>
+            
+            <div className="flex flex-col lg:flex-row gap-6 lg:items-center">
+              <div className="text-slate-400 text-sm">
+                <p>Created by <strong className="text-white">Razeen Ali</strong></p>
+              </div>
+              
+              <div className="flex gap-4 text-sm">
+                <a 
+                  href="https://razeenali.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  🌐 Website
+                </a>
+                <a 
+                  href="https://linkedin.com/in/razeenal" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  💼 LinkedIn
+                </a>
+                <a 
+                  href="https://github.com/r4z33n4l1" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  🐙 GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-slate-700 mt-6 pt-4 text-center text-slate-500 text-xs">
+            <p>© 2024 Razeen Ali. Open source under MIT License. Built with React + WebAssembly.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
