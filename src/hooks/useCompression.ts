@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react'
 import { compressPDFHybrid } from '@/lib/pdf-compression-hybrid'
 import { compressImageAdvanced } from '@/lib/image-compression'
@@ -34,9 +35,9 @@ interface PDFCompressionStats {
 }
 
 const PROGRESS_STAGES = {
-  INITIALIZING: { name: "Initializing", description: "Loading WebAssembly engine..." },
-  PARSING: { name: "Parsing", description: "Analyzing file structure..." },
-  PROCESSING: { name: "Processing", description: "Compressing pages with WASM..." },
+  INITIALIZING: { name: "Initializing", description: "Setting up compression engine..." },
+  PARSING: { name: "Parsing", description: "Analyzing PDF structure..." },
+  PROCESSING: { name: "Processing", description: "Compressing images and content..." },
   FINALIZING: { name: "Finalizing", description: "Building optimized output..." },
   COMPLETED: { name: "Completed", description: "Compression finished successfully!" }
 }
@@ -66,6 +67,7 @@ export function useCompression() {
 
   const updateProgress = useCallback((progress: number) => {
     const stage = getStageFromProgress(progress);
+    console.log(`📊 Progress update: ${progress.toFixed(1)}% - ${stage.name}`);
     setState(prev => ({ 
       ...prev, 
       progress,
@@ -93,13 +95,18 @@ export function useCompression() {
       let compressionResult: CompressionResult
 
       if (file.type === 'application/pdf') {
-        console.log('📄 Using HYBRID PDF compression (PDF.js + WASM + PDF-lib)...')
+        console.log('📄 Using HYBRID PDF compression...')
         
-        // Use our new HYBRID PDF compression approach
+        // Create a more granular progress callback for PDF compression
+        const pdfProgressCallback = (progress: number) => {
+          console.log(`📈 PDF compression progress: ${progress.toFixed(1)}%`);
+          updateProgress(progress);
+        };
+        
         const result = await compressPDFHybrid(
           arrayBuffer,
-          'medium', // Default compression level
-          updateProgress
+          'medium',
+          pdfProgressCallback
         )
         
         compressedBuffer = result.buffer
@@ -107,7 +114,6 @@ export function useCompression() {
         
         console.log('📊 Hybrid compression stats:', stats)
         
-        // Validate the result
         if (!compressedBuffer || compressedBuffer.byteLength === 0) {
           throw new Error('Compressed buffer is empty or invalid')
         }
@@ -125,29 +131,17 @@ export function useCompression() {
           processedPages: stats.processedPages
         }
         
-        setState(prev => ({
-          ...prev,
-          progress: 100,
-          result: compressionResult,
-          currentStage: getStageFromProgress(100)
-        }))
-        
       } else if (file.type.startsWith('image/')) {
         console.log('🖼️ Using advanced image compression...')
         
-        // Stage 1: Initializing (0-20%)
         updateProgress(10);
-        
-        // Stage 2: Processing (20-90%)
-        updateProgress(50);
+        updateProgress(30);
         
         const result = await compressImageAdvanced(arrayBuffer, file.type)
         compressedBuffer = result.buffer
         
-        // Stage 3: Finalizing (90-100%)
-        updateProgress(95);
+        updateProgress(90);
         
-        // Validate the image result
         if (!compressedBuffer || compressedBuffer.byteLength === 0) {
           throw new Error('Image compression failed - empty buffer')
         }
@@ -159,20 +153,23 @@ export function useCompression() {
           mimeType: result.mimeType
         }
         
-        setState(prev => ({
-          ...prev,
-          progress: 100,
-          result: compressionResult,
-          currentStage: getStageFromProgress(100)
-        }))
-        
       } else {
         throw new Error(`Unsupported file type: ${file.type}`)
       }
 
+      // Ensure we reach 100% completion
+      updateProgress(100);
+      
+      setState(prev => ({
+        ...prev,
+        progress: 100,
+        result: compressionResult,
+        currentStage: getStageFromProgress(100),
+        isCompressing: false
+      }))
+
       console.log('✅ Compression completed successfully')
       
-      setState(prev => ({ ...prev, isCompressing: false }))
       return {
         buffer: compressedBuffer,
         result: compressionResult

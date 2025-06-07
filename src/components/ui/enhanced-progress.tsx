@@ -1,3 +1,4 @@
+
 import { cn } from '@/lib/utils';
 import { Progress } from './progress';
 import { Cpu, FileText, Zap, HardDrive, Sparkles } from 'lucide-react';
@@ -41,30 +42,35 @@ export function EnhancedProgress({
       {showStages && stage && (
         <div className="flex items-center gap-2 text-sm">
           {IconComponent && (
-            <IconComponent className={cn("w-4 h-4", stageColor, animated && "animate-pulse")} />
+            <IconComponent className={cn(
+              "w-4 h-4 transition-all duration-300", 
+              stageColor, 
+              animated && "animate-pulse"
+            )} />
           )}
-          <span className="text-white font-medium">{stage}</span>
-          <span className="text-slate-400 text-xs ml-auto">{value.toFixed(1)}%</span>
+          <span className="text-foreground font-medium">{stage}</span>
+          <span className="text-muted-foreground text-xs ml-auto">{value.toFixed(1)}%</span>
         </div>
       )}
       
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <Progress 
           value={value} 
           className={cn(
-            "h-3 overflow-hidden",
-            animated && "transition-all duration-300 ease-out"
+            "h-3 transition-all duration-500 ease-out",
+            animated && "animate-pulse"
           )}
         />
         
-        {/* Animated sparkles for active progress */}
+        {/* Animated shimmer effect */}
         {animated && value > 0 && value < 100 && (
-          <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden rounded-full">
             <div 
-              className="h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
+              className="h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
               style={{
-                width: '30%',
-                transform: `translateX(${(value / 100) * 200 - 30}%)`
+                width: '40%',
+                transform: `translateX(${(value / 100) * 150 - 40}%)`,
+                transition: 'transform 0.5s ease-out'
               }}
             />
           </div>
@@ -78,9 +84,9 @@ export function EnhancedProgress({
         )}
       </div>
       
-      {/* Stage indicators */}
+      {/* Mobile-friendly stage indicators */}
       {showStages && (
-        <div className="flex justify-between text-xs">
+        <div className="grid grid-cols-5 gap-1 text-xs">
           {Object.entries(STAGE_ICONS).map(([stageName, Icon], index) => {
             const isActive = stage === stageName;
             const isCompleted = value >= (index + 1) * 20;
@@ -89,16 +95,16 @@ export function EnhancedProgress({
               <div
                 key={stageName}
                 className={cn(
-                  "flex flex-col items-center gap-1 transition-all duration-300",
-                  isActive ? "scale-110" : "scale-90",
-                  isCompleted ? "text-green-400" : isActive ? stageColor : "text-slate-600"
+                  "flex flex-col items-center gap-1 p-1 rounded transition-all duration-300",
+                  isActive ? "scale-110 bg-accent/20" : "scale-90",
+                  isCompleted ? "text-green-400" : isActive ? stageColor : "text-muted-foreground"
                 )}
               >
                 <Icon className={cn(
-                  "w-3 h-3",
+                  "w-3 h-3 sm:w-4 sm:h-4",
                   isActive && animated && "animate-pulse"
                 )} />
-                <span className="text-xs truncate w-12 text-center">
+                <span className="text-[10px] sm:text-xs truncate text-center leading-tight">
                   {stageName.slice(0, 4)}
                 </span>
               </div>
@@ -108,4 +114,4 @@ export function EnhancedProgress({
       )}
     </div>
   );
-} 
+}

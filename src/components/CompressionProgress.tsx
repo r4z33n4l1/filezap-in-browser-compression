@@ -1,3 +1,4 @@
+
 import { Progress } from '@/components/ui/progress';
 import { EnhancedProgress } from '@/components/ui/enhanced-progress';
 import { Loader2, Cpu, FileText, Zap, CheckCircle2, Clock, HardDrive } from 'lucide-react';
@@ -12,14 +13,14 @@ interface ProgressStage {
   name: string;
   description: string;
   icon: React.ReactNode;
-  range: [number, number]; // [start%, end%]
+  range: [number, number];
   color: string;
 }
 
 const PROGRESS_STAGES: ProgressStage[] = [
   {
     name: "Initializing",
-    description: "Loading WebAssembly engine...",
+    description: "Setting up compression engine...",
     icon: <Cpu className="w-4 h-4" />,
     range: [0, 10],
     color: "text-blue-400"
@@ -33,7 +34,7 @@ const PROGRESS_STAGES: ProgressStage[] = [
   },
   {
     name: "Processing",
-    description: "Compressing pages with WASM...",
+    description: "Compressing content...",
     icon: <Zap className="w-4 h-4" />,
     range: [20, 90],
     color: "text-purple-400"
@@ -95,42 +96,42 @@ export const CompressionProgress = ({ files }: CompressionProgressProps) => {
   if (files.length === 0) return null;
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+    <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border">
+      {/* Header - Mobile optimized */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
         <div className="relative">
-          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+          <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 animate-spin" />
+          <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse" />
         </div>
-        <div className="flex-1">
-          <h3 className="text-white text-lg font-semibold">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-foreground text-lg sm:text-xl font-semibold">
             VaultCompress Processing
           </h3>
-          <p className="text-slate-400 text-sm">
+          <p className="text-muted-foreground text-xs sm:text-sm">
             {files.length} file{files.length > 1 ? 's' : ''} • 100% private processing
           </p>
         </div>
-        <div className="text-right text-sm">
-          <div className="text-white font-mono">{averageProgress.toFixed(1)}%</div>
-          <div className="text-slate-400">Complete</div>
+        <div className="text-right text-sm shrink-0">
+          <div className="text-foreground font-mono text-lg sm:text-xl">{averageProgress.toFixed(1)}%</div>
+          <div className="text-muted-foreground text-xs">Complete</div>
         </div>
       </div>
 
-      {/* Current Stage Indicator */}
-      <div className="mb-6 p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
-        <div className="flex items-center gap-3 mb-3">
+      {/* Current Stage Indicator - Mobile optimized */}
+      <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-accent/20 rounded-lg border border-accent/30">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3">
           <div className={`${currentStage.color} animate-pulse`}>
             {currentStage.icon}
           </div>
-          <div>
-            <div className="text-white font-medium">{currentStage.name}</div>
-            <div className="text-slate-400 text-sm">{currentStage.description}</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-foreground font-medium text-sm sm:text-base">{currentStage.name}</div>
+            <div className="text-muted-foreground text-xs sm:text-sm truncate">{currentStage.description}</div>
           </div>
         </div>
         
         {/* Stage Progress Bar */}
         <div className="space-y-2">
-          <div className="flex justify-between text-xs text-slate-400">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>Stage Progress</span>
             <span>
               {Math.max(0, Math.min(100, 
@@ -151,36 +152,40 @@ export const CompressionProgress = ({ files }: CompressionProgressProps) => {
         </div>
       </div>
 
-      {/* Overall Progress */}
-      <div className="space-y-3 mb-6">
+      {/* Overall Progress - Mobile optimized */}
+      <div className="space-y-3 mb-4 sm:mb-6">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Overall Progress</span>
-          <span className="text-white font-mono">{averageProgress.toFixed(1)}%</span>
+          <span className="text-muted-foreground">Overall Progress</span>
+          <span className="text-foreground font-mono">{averageProgress.toFixed(1)}%</span>
         </div>
-        <EnhancedProgress value={averageProgress} className="h-4" />
+        <EnhancedProgress 
+          value={averageProgress} 
+          animated={true} 
+          className="h-3 sm:h-4" 
+        />
         
-        {/* Progress Statistics */}
-        <div className="grid grid-cols-3 gap-4 text-xs">
-          <div className="text-center p-2 bg-slate-700/20 rounded">
-            <div className="text-slate-400">Elapsed</div>
-            <div className="text-white font-mono">{formatTime(elapsedTime)}</div>
+        {/* Progress Statistics - Mobile grid */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs">
+          <div className="text-center p-2 bg-accent/10 rounded">
+            <div className="text-muted-foreground">Elapsed</div>
+            <div className="text-foreground font-mono text-xs sm:text-sm">{formatTime(elapsedTime)}</div>
           </div>
-          <div className="text-center p-2 bg-slate-700/20 rounded">
-            <div className="text-slate-400">Speed</div>
-            <div className="text-white font-mono">{formatSpeed(speed)}</div>
+          <div className="text-center p-2 bg-accent/10 rounded">
+            <div className="text-muted-foreground">Speed</div>
+            <div className="text-foreground font-mono text-xs sm:text-sm">{formatSpeed(speed)}</div>
           </div>
-          <div className="text-center p-2 bg-slate-700/20 rounded">
-            <div className="text-slate-400">Remaining</div>
-            <div className="text-white font-mono">
+          <div className="text-center p-2 bg-accent/10 rounded">
+            <div className="text-muted-foreground">Remaining</div>
+            <div className="text-foreground font-mono text-xs sm:text-sm">
               {timeRemaining > 0 ? formatTime(timeRemaining) : '--'}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Individual File Progress */}
-      <div className="space-y-3">
-        <div className="text-sm text-slate-400 font-medium">Individual Files</div>
+      {/* Individual File Progress - Mobile optimized */}
+      <div className="space-y-2 sm:space-y-3">
+        <div className="text-sm text-muted-foreground font-medium">Individual Files</div>
         {files.map((file, index) => {
           const fileProgress = file.progress || 0;
           const fileStage = getCurrentStage(fileProgress);
@@ -190,46 +195,45 @@ export const CompressionProgress = ({ files }: CompressionProgressProps) => {
           return (
             <div 
               key={file.id} 
-              className={`flex items-center gap-3 p-4 rounded-lg border transition-all duration-300 ${
+              className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border transition-all duration-300 ${
                 isCompleted 
                   ? 'bg-green-500/10 border-green-500/30' 
                   : isActive 
-                    ? 'bg-blue-500/10 border-blue-500/30 animate-pulse' 
-                    : 'bg-slate-700/20 border-slate-600/30'
+                    ? 'bg-blue-500/10 border-blue-500/30' 
+                    : 'bg-accent/10 border-accent/30'
               }`}
             >
               {/* File Status Icon */}
               <div className={`flex-shrink-0 ${
-                isCompleted ? 'text-green-400' : isActive ? fileStage.color : 'text-slate-500'
+                isCompleted ? 'text-green-400' : isActive ? fileStage.color : 'text-muted-foreground'
               }`}>
                 {isCompleted ? (
-                  <CheckCircle2 className="w-5 h-5" />
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                 ) : isActive ? (
                   <div className="animate-spin">
                     {fileStage.icon}
                   </div>
                 ) : (
-                  <Clock className="w-5 h-5" />
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                 )}
               </div>
 
               {/* File Info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-white text-sm font-medium truncate">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+                  <p className="text-foreground text-sm font-medium truncate">
                     {file.originalFile.name}
                   </p>
                   {file.pageCount && (
-                    <span className="text-xs text-slate-400 bg-slate-600/50 px-2 py-0.5 rounded">
+                    <span className="text-xs text-muted-foreground bg-accent/50 px-2 py-0.5 rounded self-start sm:self-auto">
                       {file.processedPages || 0}/{file.pageCount} pages
                     </span>
                   )}
                 </div>
                 
-                <div className="flex justify-between items-center text-xs text-slate-400 mb-2">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs text-muted-foreground mb-2 gap-1">
                   <span>
                     {isCompleted ? 'Completed' : isActive ? fileStage.name : 'Pending'}
-                    {isActive && ` • ${fileStage.description}`}
                   </span>
                   <span>{(file.originalFile.size / 1024 / 1024).toFixed(1)} MB</span>
                 </div>
@@ -242,7 +246,7 @@ export const CompressionProgress = ({ files }: CompressionProgressProps) => {
                     animated={isActive}
                     className="h-2 flex-1" 
                   />
-                  <span className="text-xs text-white font-mono w-12 text-right">
+                  <span className="text-xs text-foreground font-mono w-10 sm:w-12 text-right">
                     {fileProgress.toFixed(0)}%
                   </span>
                 </div>
@@ -253,8 +257,8 @@ export const CompressionProgress = ({ files }: CompressionProgressProps) => {
       </div>
 
       {/* Bottom Status */}
-      <div className="mt-4 pt-4 border-t border-slate-600/30 text-center">
-        <div className="text-xs text-slate-400">
+      <div className="mt-4 pt-4 border-t text-center">
+        <div className="text-xs text-muted-foreground">
           🔒 All processing happens locally in your browser - your files never leave your device
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FileDropZone } from '@/components/FileDropZone';
 import { CompressionProgress } from '@/components/CompressionProgress';
 import { FileList } from '@/components/FileList';
@@ -26,7 +26,7 @@ export interface CompressedFile {
 
 const Index = () => {
   const [files, setFiles] = useState<CompressedFile[]>([]);
-  const { compressFile, isCompressing, progress, result, error, reset } = useCompression();
+  const { compressFile, isCompressing, progress, result, error, reset, currentStage } = useCompression();
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
 
   const handleFilesAdded = useCallback(async (newFiles: File[]) => {
@@ -37,6 +37,7 @@ const Index = () => {
       originalFile: file,
       originalSize: file.size,
       status: 'pending' as const,
+      progress: 0,
     }));
     
     setFiles(prev => [...prev, ...fileEntries]);
@@ -49,7 +50,7 @@ const Index = () => {
         // Set as active file
         setActiveFileId(fileEntry.id);
         setFiles(prev => prev.map(f => 
-          f.id === fileEntry.id ? { ...f, status: 'compressing' } : f
+          f.id === fileEntry.id ? { ...f, status: 'compressing', progress: 0 } : f
         ));
         
         // Start compression
@@ -86,11 +87,6 @@ const Index = () => {
           // Handle error case
           const errorMessage = error || 'Compression returned empty buffer';
           console.error(`❌ Compression failed for: ${fileEntry.originalFile.name}`, errorMessage);
-          console.error(`🔍 Debug info:`, { 
-            compressionOutput: !!compressionOutput, 
-            bufferSize: compressionOutput?.buffer?.byteLength || 0,
-            error 
-          });
           
           setFiles(prev => prev.map(f => 
             f.id === fileEntry.id ? {
@@ -126,14 +122,15 @@ const Index = () => {
     
   }, [compressFile, result, error, reset]);
 
-  // Update progress for active file
-  useState(() => {
-    if (activeFileId && progress > 0) {
+  // Update progress for active file in real-time
+  useEffect(() => {
+    if (activeFileId && progress >= 0) {
+      console.log(`📊 Updating progress for file ${activeFileId}: ${progress.toFixed(1)}%`);
       setFiles(prev => prev.map(f => 
         f.id === activeFileId ? { ...f, progress } : f
       ));
     }
-  });
+  }, [activeFileId, progress]);
 
   const handleRemoveFile = useCallback((fileId: string) => {
     setFiles(prev => prev.filter(f => f.id !== fileId));
@@ -155,19 +152,16 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Header />
       
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="grid gap-8">
+      <main className="container mx-auto px-4 py-4 sm:py-8 max-w-6xl">
+        <div className="grid gap-4 sm:gap-8">
           {/* Status Banner */}
-          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-4 text-white">
-            <h2 className="text-xl font-bold mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
-            <p className="text-sm opacity-90">
+          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-3 sm:p-4 text-white">
+            <h2 className="text-lg sm:text-xl font-bold mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
+            <p className="text-xs sm:text-sm opacity-90">
               <strong>100% Local Processing</strong> → Zero uploads, zero tracking, zero data collection!
               {files.length > 0 && ` Processing ${files.length} files privately...`}
             </p>
           </div>
-          
-          {/* WASM Status - Hidden since we're using JavaScript now */}
-          {/* <WasmStatus /> */}
           
           {/* Debug Panel - Remove in production */}
           <WasmDebugPanel />
@@ -219,7 +213,7 @@ const Index = () => {
       </main>
       
       {/* Footer */}
-      <footer className="border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm mt-16">
+      <footer className="border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm mt-8 sm:mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
