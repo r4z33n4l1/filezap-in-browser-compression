@@ -30,10 +30,13 @@ export interface ErrorMessage {
 
 // Guess MIME from PDF image dictionary
 const mimeFor = (dict: PDFDict): string => {
-  const filter = dict.lookupMaybe(PDFName.of('Filter'));
-  if (filter?.toString().includes('DCT')) return 'image/jpeg';
-  if (filter?.toString().includes('JPX')) return 'image/jp2';
-  if (filter?.toString().includes('Flate')) return 'image/png';
+  const filter = dict.lookupMaybe(PDFName.of('Filter'), PDFName);
+  if (filter) {
+    const filterStr = filter.toString();
+    if (filterStr.includes('DCT')) return 'image/jpeg';
+    if (filterStr.includes('JPX')) return 'image/jp2';
+    if (filterStr.includes('Flate')) return 'image/png';
+  }
   return 'image/jpeg'; // Default fallback
 };
 
@@ -68,7 +71,8 @@ const compressImagesInPdf = async (
       if (xobjs) {
         for (const [, ref] of xobjs.entries()) {
           const stream = doc.context.lookup(ref) as PDFStream;
-          if (stream?.dict?.get(PDFName.of('Subtype'))?.equals(PDFName.of('Image'))) {
+          const subtype = stream?.dict?.get(PDFName.of('Subtype'));
+          if (subtype && subtype.toString() === '/Image') {
             totalImages++;
           }
         }
@@ -87,7 +91,9 @@ const compressImagesInPdf = async (
       for (const [key, ref] of xobjs.entries()) {
         try {
           const stream = doc.context.lookup(ref) as PDFStream;
-          if (stream?.dict?.get(PDFName.of('Subtype'))?.equals(PDFName.of('Image'))) {
+          const subtype = stream?.dict?.get(PDFName.of('Subtype'));
+          
+          if (subtype && subtype.toString() === '/Image') {
             
             const mime = mimeFor(stream.dict);
             const origBytes = stream.getContents();
@@ -104,7 +110,7 @@ const compressImagesInPdf = async (
                 { 
                   maxSizeMB: 0.8, 
                   maxWidthOrHeight: 1920, 
-                  quality: 0.75,
+                  initialQuality: 0.75,
                   useWebWorker: false
                 }
               );
@@ -177,7 +183,7 @@ const compressImage = async (
       maxSizeMB: 1,
       maxWidthOrHeight: 1920,
       useWebWorker: false,
-      quality: 0.8
+      initialQuality: 0.8
     };
     
     onProgress(60);
