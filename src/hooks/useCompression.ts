@@ -11,11 +11,18 @@ export interface CompressionResult {
   processedPages?: number
 }
 
+export interface ProgressStage {
+  name: string
+  description: string
+  progress: number
+}
+
 interface CompressionState {
   isCompressing: boolean
   progress: number
   result: CompressionResult | null
   error: string | null
+  currentStage?: ProgressStage
 }
 
 interface PDFCompressionStats {
@@ -26,13 +33,45 @@ interface PDFCompressionStats {
   processedPages: number
 }
 
+const PROGRESS_STAGES = {
+  INITIALIZING: { name: "Initializing", description: "Loading WebAssembly engine..." },
+  PARSING: { name: "Parsing", description: "Analyzing file structure..." },
+  PROCESSING: { name: "Processing", description: "Compressing pages with WASM..." },
+  FINALIZING: { name: "Finalizing", description: "Building optimized output..." },
+  COMPLETED: { name: "Completed", description: "Compression finished successfully!" }
+}
+
+function getStageFromProgress(progress: number): ProgressStage {
+  if (progress < 10) {
+    return { ...PROGRESS_STAGES.INITIALIZING, progress };
+  } else if (progress < 20) {
+    return { ...PROGRESS_STAGES.PARSING, progress };
+  } else if (progress < 90) {
+    return { ...PROGRESS_STAGES.PROCESSING, progress };
+  } else if (progress < 100) {
+    return { ...PROGRESS_STAGES.FINALIZING, progress };
+  } else {
+    return { ...PROGRESS_STAGES.COMPLETED, progress };
+  }
+}
+
 export function useCompression() {
   const [state, setState] = useState<CompressionState>({
     isCompressing: false,
     progress: 0,
     result: null,
     error: null,
+    currentStage: undefined
   })
+
+  const updateProgress = useCallback((progress: number) => {
+    const stage = getStageFromProgress(progress);
+    setState(prev => ({ 
+      ...prev, 
+      progress,
+      currentStage: stage
+    }));
+  }, []);
 
   const compressFile = useCallback(async (file: File): Promise<{
     buffer: ArrayBuffer;
@@ -43,6 +82,7 @@ export function useCompression() {
       progress: 0,
       result: null,
       error: null,
+      currentStage: getStageFromProgress(0)
     })
 
     try {
@@ -59,9 +99,7 @@ export function useCompression() {
         const result = await compressPDFHybrid(
           arrayBuffer,
           'medium', // Default compression level
-          (progress) => {
-            setState(prev => ({ ...prev, progress }))
-          }
+          updateProgress
         )
         
         compressedBuffer = result.buffer
@@ -90,16 +128,24 @@ export function useCompression() {
         setState(prev => ({
           ...prev,
           progress: 100,
-          result: compressionResult
+          result: compressionResult,
+          currentStage: getStageFromProgress(100)
         }))
         
       } else if (file.type.startsWith('image/')) {
         console.log('🖼️ Using advanced image compression...')
         
-        setState(prev => ({ ...prev, progress: 50 }))
+        // Stage 1: Initializing (0-20%)
+        updateProgress(10);
+        
+        // Stage 2: Processing (20-90%)
+        updateProgress(50);
         
         const result = await compressImageAdvanced(arrayBuffer, file.type)
         compressedBuffer = result.buffer
+        
+        // Stage 3: Finalizing (90-100%)
+        updateProgress(95);
         
         // Validate the image result
         if (!compressedBuffer || compressedBuffer.byteLength === 0) {
@@ -116,7 +162,8 @@ export function useCompression() {
         setState(prev => ({
           ...prev,
           progress: 100,
-          result: compressionResult
+          result: compressionResult,
+          currentStage: getStageFromProgress(100)
         }))
         
       } else {
@@ -140,11 +187,12 @@ export function useCompression() {
         isCompressing: false,
         progress: 0,
         error: errorMessage,
+        currentStage: undefined
       }))
       
       return null
     }
-  }, [])
+  }, [updateProgress])
 
   const reset = useCallback(() => {
     setState({
@@ -152,6 +200,7 @@ export function useCompression() {
       progress: 0,
       result: null,
       error: null,
+      currentStage: undefined
     })
   }, [])
 
