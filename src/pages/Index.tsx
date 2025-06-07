@@ -39,7 +39,7 @@ const Index = () => {
       if (wasm.isReady && window.wasmReady) {
         toast({
           title: "✅ WASM Engine Ready",
-          description: "PDF-Turbo compression engine is loaded and operational",
+          description: "FileZap compression engine is loaded and operational",
         });
       } else {
         toast({
@@ -186,7 +186,7 @@ const Index = () => {
           <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-2 sm:p-3 md:p-4 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xs sm:text-sm md:text-lg lg:text-xl font-bold mb-1 sm:mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
+                <h2 className="text-xs sm:text-sm md:text-lg lg:text-xl font-bold mb-1 sm:mb-2">⚡ FileZap: Lightning-Fast Privacy-First Compression</h2>
                 <p className="text-[10px] sm:text-xs md:text-sm opacity-90 leading-tight">
                   <strong>100% Local Processing</strong> → Zero uploads, zero tracking, zero data collection!
                   {files.length > 0 && ` Processing ${files.length} files privately...`}
@@ -265,9 +265,9 @@ const Index = () => {
         <div className="container mx-auto px-2 sm:px-3 md:px-4 py-4 sm:py-6 md:py-8">
           <div className="flex flex-col gap-3 sm:gap-4">
             <div>
-              <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 sm:mb-2">VaultCompress</h3>
+              <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 sm:mb-2">FileZap</h3>
               <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-                Privacy-first file compression tool. All processing happens locally in your browser - 
+                Lightning-fast, privacy-first file compression tool. All processing happens locally in your browser - 
                 your files never leave your device.
               </p>
             </div>

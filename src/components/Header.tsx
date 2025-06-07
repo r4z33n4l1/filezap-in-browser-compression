@@ -1,3 +1,4 @@
+
 import { Shield, Zap, HardDrive, Cpu, Lock, Eye } from 'lucide-react';
 
 export const Header = () => {
@@ -7,11 +8,11 @@ export const Header = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">
-              VaultCompress
-              <span className="text-green-400 ml-2">🔒</span>
+              FileZap
+              <span className="text-yellow-400 ml-2">⚡</span>
             </h1>
             <p className="text-slate-300 text-lg">
-              Privacy-first file compression with WebAssembly performance
+              Lightning-fast file compression with WebAssembly performance
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
               <span className="px-2 py-1 text-xs bg-green-600/20 text-green-300 rounded-full border border-green-500/20">

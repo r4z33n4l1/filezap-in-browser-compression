@@ -1,8 +1,9 @@
-# VaultCompress 🔒
 
-**Privacy-first file compression with WebAssembly performance**
+# FileZap ⚡
 
-Compress PDFs and images with complete privacy - all processing happens locally in your browser. Zero uploads, zero data collection, zero compromises.
+**Lightning-fast file compression with complete privacy**
+
+Compress PDFs and images with blazing speed and complete privacy - all processing happens locally in your browser. Zero uploads, zero data collection, zero compromises.
 
 ![Privacy Badge](https://img.shields.io/badge/Privacy-100%25_Local-green)
 ![WebAssembly](https://img.shields.io/badge/WebAssembly-Go_1.22-blue)
@@ -23,7 +24,7 @@ Compress PDFs and images with complete privacy - all processing happens locally 
 
 ## ✨ **Features**
 
-### 🚀 **Performance**
+### ⚡ **Lightning Performance**
 - **WebAssembly Engine**: Go-compiled WASM for native performance (5-10x faster than JavaScript)
 - **Parallel Processing**: Multi-threaded compression using Go goroutines
 - **Memory Efficient**: Smart buffer management and garbage collection
@@ -46,14 +47,14 @@ Compress PDFs and images with complete privacy - all processing happens locally 
 ## 🚀 **Quick Start**
 
 ### **Try It Now**
-Visit [VaultCompress](https://razeenali.com) - no installation required!
+Visit [FileZap](https://razeenali.com) - no installation required!
 
 ### **Local Development**
 
 ```bash
 # Clone repository
-git clone https://github.com/r4z33n4l1/vaultcompress.git
-cd vaultcompress
+git clone https://github.com/r4z33n4l1/filezap.git
+cd filezap
 
 # Install dependencies
 npm install
@@ -124,7 +125,7 @@ npm run preview         # Preview production build
 
 ### **Project Structure**
 ```
-vaultcompress/
+filezap/
 ├── src/
 │   ├── components/     # React UI components
 │   ├── hooks/         # Custom React hooks
@@ -241,4 +242,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**⭐ Star this repo if VaultCompress helps you maintain your privacy while compressing files!**
+**⭐ Star this repo if FileZap helps you compress files with lightning speed and complete privacy!**

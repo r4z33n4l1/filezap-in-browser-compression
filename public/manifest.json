@@ -1,11 +1,12 @@
+
 {
-  "name": "VaultCompress - Privacy-First File Compression",
-  "short_name": "VaultCompress",
-  "description": "Compress PDFs and images with complete privacy. All processing happens locally in your browser - zero uploads, zero tracking.",
+  "name": "FileZap - Lightning-Fast Privacy-First File Compression",
+  "short_name": "FileZap",
+  "description": "Compress PDFs and images with lightning speed and complete privacy. All processing happens locally in your browser - zero uploads, zero tracking.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#10b981",
+  "theme_color": "#eab308",
   "orientation": "portrait-primary",
   "categories": ["productivity", "utilities"],
   "icons": [
@@ -20,9 +21,10 @@
     "100% local processing",
     "Zero data collection",
     "PDF and image support",
+    "Lightning-fast performance",
     "Offline functionality"
   ],
   "screenshots": [],
   "related_applications": [],
   "prefer_related_applications": false
-} 
+}
