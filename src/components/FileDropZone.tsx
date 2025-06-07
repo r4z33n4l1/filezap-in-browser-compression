@@ -1,6 +1,6 @@
 
 import { useCallback, useState } from 'react';
-import { Upload, FileText, Image, Archive } from 'lucide-react';
+import { Upload, FileText, Image, Archive, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FileDropZoneProps {
