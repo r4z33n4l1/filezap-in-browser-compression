@@ -1,5 +1,5 @@
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { deflate } from 'pako';
 import imageCompression from 'browser-image-compression';
 
@@ -45,7 +45,7 @@ const compressImage = async (
     const options = {
       maxSizeMB: 1,
       maxWidthOrHeight: 1920,
-      useWebWorker: false, // Disable to avoid nested worker issues
+      useWebWorker: false,
       quality: 0.8
     };
     
@@ -87,27 +87,11 @@ const compressPDF = async (
     pdfDoc.setProducer('');
     pdfDoc.setCreator('');
     
-    onProgress(50);
+    onProgress(70);
     
-    // Get all pages and optimize them
-    const pages = pdfDoc.getPages();
-    
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-      
-      // You could add more optimizations here like:
-      // - Compressing embedded images (more complex)
-      // - Removing unused resources
-      // - Optimizing fonts
-      
-      onProgress(50 + (i / pages.length) * 30);
-    }
-    
-    onProgress(80);
-    
-    // Save the optimized PDF
+    // Save the optimized PDF with compression settings
     const optimizedPdfBytes = await pdfDoc.save({
-      useObjectStreams: false, // Better compression
+      useObjectStreams: false,
       addDefaultPage: false,
     });
     
@@ -122,7 +106,7 @@ const compressPDF = async (
     onProgress(50);
     const uint8Array = new Uint8Array(arrayBuffer);
     onProgress(80);
-    const compressed = deflate(uint8Array, { level: 6 }); // Lower level to avoid corruption
+    const compressed = deflate(uint8Array, { level: 6 });
     onProgress(100);
     
     return compressed.buffer;
