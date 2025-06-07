@@ -1,125 +1,163 @@
+import { useState, useCallback } from 'react'
+import { compressPDFHybrid } from '@/lib/pdf-compression-hybrid'
+import { compressImageAdvanced } from '@/lib/image-compression'
 
-import { useState, useCallback, useRef } from 'react';
-
-interface CompressionCallbacks {
-  onProgress: (progress: number) => void;
-  onComplete: (result: {
-    compressedBlob: Blob;
-    compressedSize: number;
-    compressionRatio: number;
-    timeElapsed: number;
-  }) => void;
-  onError: (error: Error) => void;
+export interface CompressionResult {
+  originalSize: number
+  compressedSize: number
+  compressionRatio: number
+  mimeType: string
+  pageCount?: number
+  processedPages?: number
 }
 
-export const useCompression = () => {
-  const [isCompressing, setIsCompressing] = useState(false);
-  const workerRef = useRef<Worker | null>(null);
+interface CompressionState {
+  isCompressing: boolean
+  progress: number
+  result: CompressionResult | null
+  error: string | null
+}
 
-  const initializeWorker = useCallback(() => {
-    if (!workerRef.current) {
-      workerRef.current = new Worker(
-        new URL('../workers/compressionWorker.ts', import.meta.url),
-        { type: 'module' }
-      );
-    }
-    return workerRef.current;
-  }, []);
+interface PDFCompressionStats {
+  originalSize: number
+  compressedSize: number
+  compressionRatio: number
+  pageCount: number
+  processedPages: number
+}
 
-  const compressFile = useCallback(async (
-    file: File, 
-    callbacks: CompressionCallbacks
-  ) => {
-    setIsCompressing(true);
-    const startTime = Date.now();
+export function useCompression() {
+  const [state, setState] = useState<CompressionState>({
+    isCompressing: false,
+    progress: 0,
+    result: null,
+    error: null,
+  })
+
+  const compressFile = useCallback(async (file: File): Promise<{
+    buffer: ArrayBuffer;
+    result: CompressionResult;
+  } | null> => {
+    setState({
+      isCompressing: true,
+      progress: 0,
+      result: null,
+      error: null,
+    })
 
     try {
-      const worker = initializeWorker();
+      console.log(`🔄 Starting compression for ${file.name} (${file.size} bytes)`)
       
-      // Convert file to ArrayBuffer
-      const arrayBuffer = await file.arrayBuffer();
-      
-      // Set up worker message handlers
-      const handleMessage = (event: MessageEvent) => {
-        const { type, ...data } = event.data;
-        
-        switch (type) {
-          case 'progress':
-            callbacks.onProgress(data.progress);
-            break;
-            
-          case 'result':
-            const timeElapsed = Date.now() - startTime;
-            
-            // Create blob with proper MIME type preservation
-            const mimeType = file.type || 'application/octet-stream';
-            const compressedBlob = new Blob([data.compressedData], { 
-              type: mimeType 
-            });
-            
-            console.log(`Compression completed:
-              Original: ${data.originalSize} bytes
-              Compressed: ${data.compressedSize} bytes
-              Ratio: ${data.compressionRatio.toFixed(3)}
-              Time: ${timeElapsed}ms`);
-            
-            callbacks.onComplete({
-              compressedBlob,
-              compressedSize: data.compressedSize,
-              compressionRatio: data.compressionRatio,
-              timeElapsed
-            });
-            
-            worker.removeEventListener('message', handleMessage);
-            worker.removeEventListener('error', handleError);
-            break;
-            
-          case 'error':
-            console.error('Compression worker error:', data.error);
-            callbacks.onError(new Error(data.error));
-            worker.removeEventListener('message', handleMessage);
-            worker.removeEventListener('error', handleError);
-            break;
-        }
-      };
-      
-      const handleError = (error: ErrorEvent) => {
-        console.error('Worker runtime error:', error);
-        callbacks.onError(new Error(`Worker error: ${error.message}`));
-        worker.removeEventListener('message', handleMessage);
-        worker.removeEventListener('error', handleError);
-      };
-      
-      worker.addEventListener('message', handleMessage);
-      worker.addEventListener('error', handleError);
-      
-      // Send compression task to worker
-      worker.postMessage({
-        type: 'compress',
-        fileData: arrayBuffer,
-        fileName: file.name,
-        fileType: file.type
-      });
-      
-    } catch (error) {
-      console.error('Compression setup error:', error);
-      callbacks.onError(error instanceof Error ? error : new Error('Compression failed'));
-    } finally {
-      setIsCompressing(false);
-    }
-  }, [initializeWorker]);
+      const arrayBuffer = await file.arrayBuffer()
+      let compressedBuffer: ArrayBuffer
+      let compressionResult: CompressionResult
 
-  // Cleanup worker on unmount
-  const cleanup = useCallback(() => {
-    if (workerRef.current) {
-      workerRef.current.terminate();
-      workerRef.current = null;
+      if (file.type === 'application/pdf') {
+        console.log('📄 Using HYBRID PDF compression (PDF.js + WASM + PDF-lib)...')
+        
+        // Use our new HYBRID PDF compression approach
+        const result = await compressPDFHybrid(
+          arrayBuffer,
+          'medium', // Default compression level
+          (progress) => {
+            setState(prev => ({ ...prev, progress }))
+          }
+        )
+        
+        compressedBuffer = result.buffer
+        const stats = result.stats
+        
+        console.log('📊 Hybrid compression stats:', stats)
+        
+        // Validate the result
+        if (!compressedBuffer || compressedBuffer.byteLength === 0) {
+          throw new Error('Compressed buffer is empty or invalid')
+        }
+        
+        if (stats.originalSize === 0) {
+          throw new Error('Original size not captured correctly')
+        }
+        
+        compressionResult = {
+          originalSize: stats.originalSize,
+          compressedSize: stats.compressedSize,
+          compressionRatio: stats.compressionRatio,
+          mimeType: 'application/pdf',
+          pageCount: stats.pageCount,
+          processedPages: stats.processedPages
+        }
+        
+        setState(prev => ({
+          ...prev,
+          progress: 100,
+          result: compressionResult
+        }))
+        
+      } else if (file.type.startsWith('image/')) {
+        console.log('🖼️ Using advanced image compression...')
+        
+        setState(prev => ({ ...prev, progress: 50 }))
+        
+        const result = await compressImageAdvanced(arrayBuffer, file.type)
+        compressedBuffer = result.buffer
+        
+        // Validate the image result
+        if (!compressedBuffer || compressedBuffer.byteLength === 0) {
+          throw new Error('Image compression failed - empty buffer')
+        }
+        
+        compressionResult = {
+          originalSize: file.size,
+          compressedSize: result.buffer.byteLength,
+          compressionRatio: ((file.size - result.buffer.byteLength) / file.size) * 100,
+          mimeType: result.mimeType
+        }
+        
+        setState(prev => ({
+          ...prev,
+          progress: 100,
+          result: compressionResult
+        }))
+        
+      } else {
+        throw new Error(`Unsupported file type: ${file.type}`)
+      }
+
+      console.log('✅ Compression completed successfully')
+      
+      setState(prev => ({ ...prev, isCompressing: false }))
+      return {
+        buffer: compressedBuffer,
+        result: compressionResult
+      }
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      console.error('❌ Compression failed:', errorMessage)
+      
+      setState(prev => ({
+        ...prev,
+        isCompressing: false,
+        progress: 0,
+        error: errorMessage,
+      }))
+      
+      return null
     }
-  }, []);
+  }, [])
+
+  const reset = useCallback(() => {
+    setState({
+      isCompressing: false,
+      progress: 0,
+      result: null,
+      error: null,
+    })
+  }, [])
 
   return {
+    ...state,
     compressFile,
-    isCompressing,
-    cleanup
-  };
-};
+    reset,
+  }
+}

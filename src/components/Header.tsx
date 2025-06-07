@@ -1,5 +1,5 @@
 
-import { Shield, Zap, HardDrive } from 'lucide-react';
+import { Shield, Zap, HardDrive, Cpu } from 'lucide-react';
 
 export const Header = () => {
   return (
@@ -8,12 +8,23 @@ export const Header = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">
-              Shrink-It
-              <span className="text-blue-400 ml-2">Pro</span>
+              PDF-Turbo
+              <span className="text-blue-400 ml-2">🚀</span>
             </h1>
             <p className="text-slate-300 text-lg">
-              Advanced client-side file compression powered by Hybrid-Delta algorithm
+              Ultra-fast PDF & image compression powered by Go WebAssembly
             </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <span className="px-2 py-1 text-xs bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/20">
+                WebAssembly
+              </span>
+              <span className="px-2 py-1 text-xs bg-green-600/20 text-green-300 rounded-full border border-green-500/20">
+                Go-Powered
+              </span>
+              <span className="px-2 py-1 text-xs bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/20">
+                No Upload
+              </span>
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-6 text-sm">
@@ -23,9 +34,13 @@ export const Header = () => {
             </div>
             <div className="flex items-center gap-2 text-blue-400">
               <Zap className="w-4 h-4" />
-              <span>Ultra-Fast</span>
+              <span>Lightning Fast</span>
             </div>
             <div className="flex items-center gap-2 text-purple-400">
+              <Cpu className="w-4 h-4" />
+              <span>WASM Engine</span>
+            </div>
+            <div className="flex items-center gap-2 text-orange-400">
               <HardDrive className="w-4 h-4" />
               <span>Multi-Format</span>
             </div>

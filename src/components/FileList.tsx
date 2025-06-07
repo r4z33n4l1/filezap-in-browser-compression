@@ -141,6 +141,12 @@ export const FileList = ({ files, onRemoveFile, onClearAll }: FileListProps) => 
                     {file.timeElapsed && (
                       <span>Time: {(file.timeElapsed / 1000).toFixed(1)}s</span>
                     )}
+                    {file.pageCount && (
+                      <span>Pages: {file.pageCount}</span>
+                    )}
+                    {file.processedPages && file.pageCount && (
+                      <span>Processed: {file.processedPages}/{file.pageCount}</span>
+                    )}
                   </div>
                   
                   {file.error && (
