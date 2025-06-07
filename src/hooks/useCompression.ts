@@ -50,9 +50,18 @@ export const useCompression = () => {
             
           case 'result':
             const timeElapsed = Date.now() - startTime;
+            
+            // Create blob with proper MIME type preservation
+            const mimeType = file.type || 'application/octet-stream';
             const compressedBlob = new Blob([data.compressedData], { 
-              type: file.type 
+              type: mimeType 
             });
+            
+            console.log(`Compression completed:
+              Original: ${data.originalSize} bytes
+              Compressed: ${data.compressedSize} bytes
+              Ratio: ${data.compressionRatio.toFixed(3)}
+              Time: ${timeElapsed}ms`);
             
             callbacks.onComplete({
               compressedBlob,
@@ -66,6 +75,7 @@ export const useCompression = () => {
             break;
             
           case 'error':
+            console.error('Compression worker error:', data.error);
             callbacks.onError(new Error(data.error));
             worker.removeEventListener('message', handleMessage);
             worker.removeEventListener('error', handleError);
@@ -74,6 +84,7 @@ export const useCompression = () => {
       };
       
       const handleError = (error: ErrorEvent) => {
+        console.error('Worker runtime error:', error);
         callbacks.onError(new Error(`Worker error: ${error.message}`));
         worker.removeEventListener('message', handleMessage);
         worker.removeEventListener('error', handleError);
@@ -91,6 +102,7 @@ export const useCompression = () => {
       });
       
     } catch (error) {
+      console.error('Compression setup error:', error);
       callbacks.onError(error instanceof Error ? error : new Error('Compression failed'));
     } finally {
       setIsCompressing(false);

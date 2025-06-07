@@ -1,4 +1,3 @@
-
 import { Download, Trash2, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CompressedFile } from '@/pages/Index';
@@ -15,19 +14,25 @@ export const FileList = ({ files, onRemoveFile, onClearAll }: FileListProps) => 
   const handleDownload = (file: CompressedFile) => {
     if (!file.compressedBlob) return;
     
-    const url = URL.createObjectURL(file.compressedBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    
-    // Add compressed prefix and maintain original extension
-    const fileExtension = file.originalFile.name.split('.').pop() || '';
-    const nameWithoutExt = file.originalFile.name.replace(/\.[^/.]+$/, '');
-    a.download = `${nameWithoutExt}_compressed.${fileExtension}`;
-    
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const url = URL.createObjectURL(file.compressedBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      // Add compressed prefix and maintain original extension
+      const fileExtension = file.originalFile.name.split('.').pop() || '';
+      const nameWithoutExt = file.originalFile.name.replace(/\.[^/.]+$/, '');
+      a.download = `${nameWithoutExt}_compressed.${fileExtension}`;
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      console.log(`Downloaded compressed file: ${a.download} (${file.compressedSize} bytes)`);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
   };
 
   const handleDownloadAll = () => {
@@ -139,7 +144,14 @@ export const FileList = ({ files, onRemoveFile, onClearAll }: FileListProps) => 
                   </div>
                   
                   {file.error && (
-                    <p className="text-red-400 text-sm mt-1">{file.error}</p>
+                    <p className="text-red-400 text-sm mt-1">
+                      Error: {file.error}
+                      {file.error.includes('PDF') && (
+                        <span className="block text-xs text-slate-500 mt-1">
+                          Try a different PDF or check if the file is corrupted
+                        </span>
+                      )}
+                    </p>
                   )}
                 </div>
                 
