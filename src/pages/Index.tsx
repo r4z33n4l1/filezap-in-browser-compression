@@ -6,8 +6,11 @@ import { Header } from '@/components/Header';
 import { CompressionStats } from '@/components/CompressionStats';
 import { WasmStatus } from '@/components/WasmStatus';
 import { PerformanceStats } from '@/components/PerformanceStats';
-import { WasmDebugPanel } from '@/components/WasmDebugPanel';
 import { useCompression } from '@/hooks/useCompression';
+import { loadWasm } from '@/lib/wasm';
+import { Button } from '@/components/ui/button';
+import { Cpu } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export interface CompressedFile {
   id: string;
@@ -28,6 +31,31 @@ const Index = () => {
   const [files, setFiles] = useState<CompressedFile[]>([]);
   const { compressFile, isCompressing, progress, result, error, reset, currentStage } = useCompression();
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const checkWasmStatus = async () => {
+    try {
+      const wasm = await loadWasm();
+      if (wasm.isReady && window.wasmReady) {
+        toast({
+          title: "✅ WASM Engine Ready",
+          description: "PDF-Turbo compression engine is loaded and operational",
+        });
+      } else {
+        toast({
+          title: "⚠️ WASM Engine Loading",
+          description: "Compression engine is still initializing...",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "❌ WASM Engine Error",
+        description: "Failed to load compression engine",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleFilesAdded = useCallback(async (newFiles: File[]) => {
     console.log('📤 Adding files for compression:', newFiles.length);
@@ -156,15 +184,25 @@ const Index = () => {
         <div className="grid gap-2 sm:gap-3 md:gap-4 lg:gap-6 xl:gap-8">
           {/* Status Banner */}
           <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-2 sm:p-3 md:p-4 text-white">
-            <h2 className="text-xs sm:text-sm md:text-lg lg:text-xl font-bold mb-1 sm:mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
-            <p className="text-[10px] sm:text-xs md:text-sm opacity-90 leading-tight">
-              <strong>100% Local Processing</strong> → Zero uploads, zero tracking, zero data collection!
-              {files.length > 0 && ` Processing ${files.length} files privately...`}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xs sm:text-sm md:text-lg lg:text-xl font-bold mb-1 sm:mb-2">🔒 VaultCompress: Privacy-First Architecture</h2>
+                <p className="text-[10px] sm:text-xs md:text-sm opacity-90 leading-tight">
+                  <strong>100% Local Processing</strong> → Zero uploads, zero tracking, zero data collection!
+                  {files.length > 0 && ` Processing ${files.length} files privately...`}
+                </p>
+              </div>
+              <Button
+                onClick={checkWasmStatus}
+                variant="outline"
+                size="sm"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
+              >
+                <Cpu className="w-3 h-3 mr-1" />
+                Check WASM
+              </Button>
+            </div>
           </div>
-          
-          {/* Debug Panel - Remove in production */}
-          <WasmDebugPanel />
           
           {/* Drop Zone */}
           <div className="w-full min-w-0">
