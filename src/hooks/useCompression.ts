@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 interface CompressionCallbacks {
   onProgress: (progress: number) => void;
@@ -14,6 +14,17 @@ interface CompressionCallbacks {
 
 export const useCompression = () => {
   const [isCompressing, setIsCompressing] = useState(false);
+  const workerRef = useRef<Worker | null>(null);
+
+  const initializeWorker = useCallback(() => {
+    if (!workerRef.current) {
+      workerRef.current = new Worker(
+        new URL('../workers/compressionWorker.ts', import.meta.url),
+        { type: 'module' }
+      );
+    }
+    return workerRef.current;
+  }, []);
 
   const compressFile = useCallback(async (
     file: File, 
@@ -23,36 +34,60 @@ export const useCompression = () => {
     const startTime = Date.now();
 
     try {
-      // Simulate compression progress for now
-      // In a real implementation, this would use Web Workers and the actual compression algorithm
+      const worker = initializeWorker();
       
-      callbacks.onProgress(10);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Convert file to ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
       
-      callbacks.onProgress(30);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Set up worker message handlers
+      const handleMessage = (event: MessageEvent) => {
+        const { type, ...data } = event.data;
+        
+        switch (type) {
+          case 'progress':
+            callbacks.onProgress(data.progress);
+            break;
+            
+          case 'result':
+            const timeElapsed = Date.now() - startTime;
+            const compressedBlob = new Blob([data.compressedData], { 
+              type: file.type 
+            });
+            
+            callbacks.onComplete({
+              compressedBlob,
+              compressedSize: data.compressedSize,
+              compressionRatio: data.compressionRatio,
+              timeElapsed
+            });
+            
+            worker.removeEventListener('message', handleMessage);
+            worker.removeEventListener('error', handleError);
+            break;
+            
+          case 'error':
+            callbacks.onError(new Error(data.error));
+            worker.removeEventListener('message', handleMessage);
+            worker.removeEventListener('error', handleError);
+            break;
+        }
+      };
       
-      callbacks.onProgress(60);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const handleError = (error: ErrorEvent) => {
+        callbacks.onError(new Error(`Worker error: ${error.message}`));
+        worker.removeEventListener('message', handleMessage);
+        worker.removeEventListener('error', handleError);
+      };
       
-      callbacks.onProgress(90);
-      await new Promise(resolve => setTimeout(resolve, 300));
+      worker.addEventListener('message', handleMessage);
+      worker.addEventListener('error', handleError);
       
-      // Simulate compression - in reality this would be much more sophisticated
-      const compressionRatio = Math.random() * 0.3 + 0.1; // 10-40% compression
-      const compressedSize = Math.floor(file.size * compressionRatio);
-      
-      // Create a mock compressed blob (in reality this would be the actual compressed data)
-      const compressedBlob = new Blob([file], { type: file.type });
-      
-      const timeElapsed = Date.now() - startTime;
-      
-      callbacks.onProgress(100);
-      callbacks.onComplete({
-        compressedBlob,
-        compressedSize,
-        compressionRatio,
-        timeElapsed
+      // Send compression task to worker
+      worker.postMessage({
+        type: 'compress',
+        fileData: arrayBuffer,
+        fileName: file.name,
+        fileType: file.type
       });
       
     } catch (error) {
@@ -60,10 +95,19 @@ export const useCompression = () => {
     } finally {
       setIsCompressing(false);
     }
+  }, [initializeWorker]);
+
+  // Cleanup worker on unmount
+  const cleanup = useCallback(() => {
+    if (workerRef.current) {
+      workerRef.current.terminate();
+      workerRef.current = null;
+    }
   }, []);
 
   return {
     compressFile,
-    isCompressing
+    isCompressing,
+    cleanup
   };
 };

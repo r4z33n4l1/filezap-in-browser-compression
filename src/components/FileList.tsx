@@ -18,7 +18,12 @@ export const FileList = ({ files, onRemoveFile, onClearAll }: FileListProps) => 
     const url = URL.createObjectURL(file.compressedBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `compressed_${file.originalFile.name}`;
+    
+    // Add compressed prefix and maintain original extension
+    const fileExtension = file.originalFile.name.split('.').pop() || '';
+    const nameWithoutExt = file.originalFile.name.replace(/\.[^/.]+$/, '');
+    a.download = `${nameWithoutExt}_compressed.${fileExtension}`;
+    
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -28,8 +33,9 @@ export const FileList = ({ files, onRemoveFile, onClearAll }: FileListProps) => 
   const handleDownloadAll = () => {
     const completedFiles = files.filter(f => f.status === 'completed' && f.compressedBlob);
     
-    completedFiles.forEach(file => {
-      setTimeout(() => handleDownload(file), 100);
+    completedFiles.forEach((file, index) => {
+      // Stagger downloads to avoid browser blocking
+      setTimeout(() => handleDownload(file), index * 100);
     });
   };
 
