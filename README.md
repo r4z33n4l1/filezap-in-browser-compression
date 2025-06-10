@@ -47,7 +47,7 @@ Compress PDFs and images with blazing speed and complete privacy - all processin
 ## 🚀 **Quick Start**
 
 ### **Try It Now**
-Visit [FileZap](https://razeenali.com) - no installation required!
+Visit [FileZap](https://filezap.dev) - no installation required!
 
 ### **Local Development**
 
