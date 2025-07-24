@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { FileDropZone } from '@/components/FileDropZone';
 import { CompressionProgress } from '@/components/CompressionProgress';
 import { FileList } from '@/components/FileList';
+import { FileOrganizer } from '@/components/FileOrganizer';
+import { FileMerger } from '@/components/FileMerger';
 import { Header } from '@/components/Header';
 import { CompressionStats } from '@/components/CompressionStats';
 import { WasmStatus } from '@/components/WasmStatus';
@@ -9,7 +11,8 @@ import { PerformanceStats } from '@/components/PerformanceStats';
 import { useCompression } from '@/hooks/useCompression';
 import { loadWasm } from '@/lib/wasm';
 import { Button } from '@/components/ui/button';
-import { Cpu } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Cpu, Files, Merge, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export interface CompressedFile {
@@ -29,6 +32,8 @@ export interface CompressedFile {
 
 const Index = () => {
   const [files, setFiles] = useState<CompressedFile[]>([]);
+  const [stagingFiles, setStagingFiles] = useState<File[]>([]);
+  const [activeTab, setActiveTab] = useState<'organize' | 'compress'>('organize');
   const { compressFile, isCompressing, progress, result, error, reset, currentStage } = useCompression();
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -58,9 +63,15 @@ const Index = () => {
   };
 
   const handleFilesAdded = useCallback(async (newFiles: File[]) => {
-    console.log('📤 Adding files for compression:', newFiles.length);
+    console.log('📤 Adding files for organization:', newFiles.length);
+    setStagingFiles(prev => [...prev, ...newFiles]);
+    setActiveTab('organize');
+  }, []);
+
+  const handleSendToCompressor = useCallback(async (filesToCompress: File[]) => {
+    console.log('📤 Sending files to compressor:', filesToCompress.length);
     
-    const fileEntries: CompressedFile[] = newFiles.map(file => ({
+    const fileEntries: CompressedFile[] = filesToCompress.map(file => ({
       id: crypto.randomUUID(),
       originalFile: file,
       originalSize: file.size,
@@ -69,6 +80,7 @@ const Index = () => {
     }));
     
     setFiles(prev => [...prev, ...fileEntries]);
+    setActiveTab('compress');
     
     // Process files one by one
     for (const fileEntry of fileEntries) {
@@ -150,6 +162,34 @@ const Index = () => {
     
   }, [compressFile, result, error, reset]);
 
+  const handleFilesReorganized = useCallback((reorderedFiles: File[]) => {
+    setStagingFiles(reorderedFiles);
+  }, []);
+
+  const handleRemoveStagingFile = useCallback((index: number) => {
+    setStagingFiles(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleClearStaging = useCallback(() => {
+    setStagingFiles([]);
+  }, []);
+
+  const handleDownloadMerged = useCallback((mergedFile: File) => {
+    const url = URL.createObjectURL(mergedFile);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = mergedFile.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "✅ File Downloaded",
+      description: `${mergedFile.name} has been downloaded successfully`,
+    });
+  }, [toast]);
+
   // Update progress for active file in real-time
   useEffect(() => {
     if (activeFileId && progress >= 0) {
@@ -204,16 +244,88 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Drop Zone */}
+          {/* Main Content Tabs */}
           <div className="w-full min-w-0">
-            <FileDropZone 
-              onFilesAdded={handleFilesAdded}
-              isProcessing={isCompressing || compressingFiles.length > 0}
-            />
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'organize' | 'compress')}>
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="organize" className="flex items-center gap-2">
+                  <Files className="w-4 h-4" />
+                  Organize & Merge
+                  {stagingFiles.length > 0 && (
+                    <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      {stagingFiles.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="compress" className="flex items-center gap-2">
+                  <Zap className="w-4 h-4" />
+                  Compress Files
+                  {files.length > 0 && (
+                    <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      {files.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="organize" className="space-y-4">
+                {/* Drop Zone */}
+                <FileDropZone 
+                  onFilesAdded={handleFilesAdded}
+                  isProcessing={false}
+                />
+                
+                {/* File Organization */}
+                {stagingFiles.length > 0 && (
+                  <FileOrganizer
+                    files={stagingFiles}
+                    onFilesReorganized={handleFilesReorganized}
+                    onRemoveFile={handleRemoveStagingFile}
+                    onClearAll={handleClearStaging}
+                  />
+                )}
+
+                {/* File Merger */}
+                {stagingFiles.length > 0 && (
+                  <FileMerger
+                    files={stagingFiles}
+                    onSendToCompressor={handleSendToCompressor}
+                    onDownloadMerged={handleDownloadMerged}
+                  />
+                )}
+              </TabsContent>
+
+              <TabsContent value="compress" className="space-y-4">
+                {/* Compression Section */}
+                {files.length === 0 ? (
+                  <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700 p-6 text-center">
+                    <Zap className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-400 mb-2">No files in compression queue</p>
+                    <p className="text-slate-500 text-sm">
+                      Switch to "Organize & Merge" tab to add files, then send them here for compression
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Progress Overview */}
+                    {(isCompressing || compressingFiles.length > 0) && (
+                      <CompressionProgress files={compressingFiles} />
+                    )}
+                    
+                    {/* File List */}
+                    <FileList 
+                      files={files}
+                      onRemoveFile={handleRemoveFile}
+                      onClearAll={handleClearAll}
+                    />
+                  </>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
           
           {/* Compression Stats */}
-          {files.length > 0 && (
+          {files.length > 0 && activeTab === 'compress' && (
             <div className="w-full min-w-0 overflow-hidden">
               <CompressionStats
                 totalFiles={files.length}
@@ -226,7 +338,7 @@ const Index = () => {
           )}
           
           {/* Performance Stats */}
-          {completedFiles.length > 0 && (
+          {completedFiles.length > 0 && activeTab === 'compress' && (
             <div className="w-full min-w-0 overflow-hidden">
               <PerformanceStats
                 totalFiles={completedFiles.length}
@@ -234,26 +346,6 @@ const Index = () => {
                 totalOriginalSize={totalOriginalSize}
                 totalCompressedSize={totalCompressedSize}
                 averageCompressionRatio={overallCompressionRatio}
-              />
-            </div>
-          )}
-          
-          {/* Progress Overview */}
-          {(isCompressing || compressingFiles.length > 0) && (
-            <div className="w-full min-w-0 overflow-hidden">
-              <CompressionProgress 
-                files={compressingFiles}
-              />
-            </div>
-          )}
-          
-          {/* File List */}
-          {files.length > 0 && (
-            <div className="w-full min-w-0 overflow-hidden">
-              <FileList 
-                files={files}
-                onRemoveFile={handleRemoveFile}
-                onClearAll={handleClearAll}
               />
             </div>
           )}
